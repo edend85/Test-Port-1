@@ -27,7 +27,8 @@ def check_framwork_state(api_url,headers,blueprint_identifier,framework):
         URL = f"{api_url}/v1/blueprints/{blueprint_identifier}/entities?exclude_calculated_properties=false&attach_title_to_relation=false"
         response = requests.get(URL,headers=headers)
         response.raise_for_status()
-        for entity in response.json().get('entities',[]):
+        f = response.json().get('entities',[])
+        for entity in f:
             if entity['identifier'] == framework:
                 return entity['properties'].get('state')
     except requests.RequestException as e:
@@ -50,7 +51,7 @@ def update_eol_package_count(service_entity_identifier, eol_count, api_url, head
 
 # Main function to orchestrate the process
 def main():
-    api_url = input("Please enter api base URL : ")  # Example API endpoint
+    api_url = "https://api.getport.io"  # Example API endpoint
     headers = {
         "Authorization":input("Please enter your API key : "),
         "Content-Type": "application/json"
@@ -65,7 +66,7 @@ def main():
        
     # Step 2: Process each service entity
     relate_entity_identifier = input("Please enter the relate entity identifier : ")
-    blueprint = input("Please enter the blueprint with the saved pakages :")
+    blueprint = "framework"
     for entity in entities:
         # Step 3: Calculate EOL packages
         eol_packages_count = calculate_eol_packages(api_url, headers,entity,relate_entity_identifier,blueprint)
