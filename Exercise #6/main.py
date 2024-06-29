@@ -3,7 +3,7 @@ import requests
 # function to fetch service entities and frameworks from Port's API
 def fetch_service_entities(api_url, headers):
     try:
-        URL = f"{api_url}/v1/blueprints/service/entities?exclude_calculated_properties=false&attach_title_to_relation=false"
+        URL = f"{api_url}/v1/blueprints/service/entities"
         response = requests.get(URL, headers=headers)
         response.raise_for_status()  # Raise exception for HTTP errors
         return response.json()
@@ -26,7 +26,7 @@ def calculate_eol_packages(service_entity,relate_entity_identifier,all_EOL_frame
 def fetch_all_EOL_frameworks(api_url,headers,blueprint_identifier):
     all_EOL_frameworks = []
     try:
-        URL = f"{api_url}/v1/blueprints/{blueprint_identifier}/entities?exclude_calculated_properties=false&attach_title_to_relation=false"
+        URL = f"{api_url}/v1/blueprints/{blueprint_identifier}/entities"
         response = requests.get(URL,headers=headers)
         response.raise_for_status()
         all_frameworks = response.json().get('entities',[])
@@ -45,7 +45,7 @@ def update_eol_package_count(service_entity_identifier, eol_count, api_url, head
         }
     }
     try:
-        url = f"{api_url}/v1/blueprints/service/entities/{service_entity_identifier}?create_missing_related_entities=false"
+        url = f"{api_url}/v1/blueprints/service/entities/{service_entity_identifier}"
         response = requests.patch(url, headers=headers, json=update_payload)
         response.raise_for_status()  # Raise exception for HTTP errors
         print(f"EOL package count updated successfully for entity {service_entity_identifier}")
