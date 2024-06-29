@@ -1,7 +1,4 @@
-ex1:
-.spec.replicas /.status.replicas
-.spec.strategy / .spec.strategy.type
-.metadata.labels.environment + "-" +.metadata.labels.service
+exersice 1:
 
 jq '.spec.replicas' k8s-deploy.json | .status.replicas
 
