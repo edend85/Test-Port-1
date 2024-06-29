@@ -1,0 +1,14 @@
+ex1:
+.spec.replicas /.status.replicas
+.spec.strategy / .spec.strategy.type
+.metadata.labels.environment + "-" +.metadata.labels.service
+
+jq '.spec.replicas' k8s-deploy.json | .status.replicas
+
+jq '.spec.strategy' k8s-deploy.json | .spec.strategy.type
+
+jq '.metadata.labels.service + \"-\" + .metadata.labels.environment' k8s-deploy.json | .metadata.labels.environment + "-" +.metadata.labels.service (jqplay only)
+
+
+jira:
+[.. | objects | select(has("subtasks")) | .subtasks[] | "id: "+ .id]
