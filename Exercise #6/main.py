@@ -59,6 +59,7 @@ def main():
         "Authorization":input("Please enter your API key : "),
         "Content-Type": "application/json"
     }
+
     # Step 1: Fetch service entities from Port's API
     entities_response = fetch_service_entities(api_url, headers)
     if entities_response is None:
