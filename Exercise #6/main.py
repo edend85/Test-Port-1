@@ -1,6 +1,6 @@
 import requests
 
-# Function to fetch service entities and frameworks from Port's API
+# function to fetch service entities and frameworks from Port's API
 def fetch_service_entities(api_url, headers):
     try:
         URL = f"{api_url}/v1/blueprints/service/entities?exclude_calculated_properties=false&attach_title_to_relation=false"
@@ -11,26 +11,29 @@ def fetch_service_entities(api_url, headers):
         print(f"Error fetching service entities: {e}")
         return None
 
-# Function to calculate EOL packages for a service entity
-def calculate_eol_packages(api_url,headers,service_entity,relate_entity_identifier,blueprint):
-    frameworks = service_entity.get("relations", {}).get(relate_entity_identifier,[])
-    eol_packages_count = 0
-    # Counting packages marked as EOL
-    for framework in frameworks:
-        state = check_framwork_state(api_url, headers,blueprint, framework)
-        if state == "EOL":
-            eol_packages_count += 1
+# function to calculate EOL packages for a service entity
+def calculate_eol_packages(service_entity,relate_entity_identifier,all_EOL_frameworks):
+    framework_for_entity = service_entity.get("relations", {}).get(relate_entity_identifier,[]) #all the framework from specific entity
+    eol_packages_count = 0 # reseting the number of pakages so the previous number won't calcluate
+
+    # counting packages marked as EOL
+    for FOE in framework_for_entity:
+        for EOLframework in all_EOL_frameworks:
+            if FOE == EOLframework['identifier']:
+                eol_packages_count += 1     
     return eol_packages_count
 
-def check_framwork_state(api_url,headers,blueprint_identifier,framework):
+def fetch_all_EOL_frameworks(api_url,headers,blueprint_identifier):
+    all_EOL_frameworks = []
     try:
         URL = f"{api_url}/v1/blueprints/{blueprint_identifier}/entities?exclude_calculated_properties=false&attach_title_to_relation=false"
         response = requests.get(URL,headers=headers)
         response.raise_for_status()
-        f = response.json().get('entities',[])
-        for entity in f:
-            if entity['identifier'] == framework:
-                return entity['properties'].get('state')
+        all_frameworks = response.json().get('entities',[])
+        for framework in all_frameworks:
+            if framework['properties']['state'] == "EOL":
+                all_EOL_frameworks.append(framework)
+        return all_EOL_frameworks
     except requests.RequestException as e:
         print(f"An error occurred: {e}")
 
@@ -56,7 +59,6 @@ def main():
         "Authorization":input("Please enter your API key : "),
         "Content-Type": "application/json"
     }
-
     # Step 1: Fetch service entities from Port's API
     entities_response = fetch_service_entities(api_url, headers)
     if entities_response is None:
@@ -65,12 +67,10 @@ def main():
     entities = entities_response.get("entities", [])
        
     # Step 2: Process each service entity
-    relate_entity_identifier = input("Please enter the relate entity identifier : ")
-    blueprint = "framework"
+    all_EOL_frameworks = fetch_all_EOL_frameworks(api_url, headers,"framework") # all EOL framworks from framework blueprint
     for entity in entities:
         # Step 3: Calculate EOL packages
-        eol_packages_count = calculate_eol_packages(api_url, headers,entity,relate_entity_identifier,blueprint)
-        print(eol_packages_count)
+        eol_packages_count = calculate_eol_packages(entity,"framework",all_EOL_frameworks)
         # Step 4: Update EOL package count for the service entity
         update_eol_package_count(entity.get("identifier"), eol_packages_count, api_url, headers)
     
